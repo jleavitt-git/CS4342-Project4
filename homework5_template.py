@@ -14,39 +14,39 @@ def reluDerivative(z):
     return 1 * (z > 0)
 
 def forward_prop (x, y, W1, b1, W2, b2):
-    z = np.sum(np.dot(W1, x)) + b1
+    z = np.dot(W1, x) + b1[:, np.newaxis]
     h = relu(z)
-    # yhat = np.average(np.dot(W2, h) + b2)
-    yhat = np.sum(np.dot(W2, h)) + b2
+    yhat = np.dot(W2, h) + b2
     loss = 1/(2*y.size) * (np.sum(y-yhat)**2)
     # print(f"------Stats------\nW1 = {W1.shape}\nW2 = {W2.shape}\nb1 = {b1.shape}\nb2 = {b2}\nx = {x.shape}\ny = {y}\nyhat = {yhat}\nz = {z.shape}\nh = {h.shape}\nloss = {loss}")
     return loss, x, z, h, yhat
    
 def back_prop (X, y, W1, b1, W2, b2):
     loss, x, z, h, yhat = forward_prop(X, y, W1, b1, W2, b2)
-    #W2 is not supposed to be transposed
-    gT1 = np.dot(yhat-y, W2)
+    #print (y.size)
+    gT1 = np.dot(np.transpose(yhat-y), W2)
+    #print (gT1.shape)
     gT2 = reluDerivative(z.T)
-    # print(f"------Stats------\nW1 = {W1.shape}\nW2 = {W2.shape}\nb1 = {b1.shape}\nb2 = {b2}\nx = {x.shape}\ny = {y}\nyhat = {yhat}")
+    #print(f"------Stats------\nW1 = {W1.shape}\nW2 = {W2.shape}\nb1 = {b1.shape}\nb2 = {b2}\nx = {x.shape}\ny = {y}\nyhat = {yhat}")
     gT = gT1 * gT2
     gradW2 = np.dot(yhat-y, h.T)
-    gradb2 = yhat-y
+    gradb2 = np.mean(yhat-y, axis = 1) #average across all training examples
     gradW1 = np.dot(gT.T, x.T)
-    gradb1 = gT.T
+    gradb1 = np.mean(gT.T, axis = 1) #average across all training examples
     return gradW1, gradb1, gradW2, gradb2
 
 def train (trainX, trainY, W1, b1, W2, b2, testX, testY, epsilon = 1e-2, batchSize = 64, numEpochs = 1000):
-
+    print("Starting to train...")
     for i in range (numEpochs):
         if i % 500 == 0 and i != 0:
             print(f"Progress {i/50}%")
-        for i in range((int(np.size(trainY)/batchSize)) - 1):
-            gradW1, gradb1, gradW2, gradb2 = back_prop(trainX, trainY, W1, b1, W2, b2)
+        for i in range((int(trainY.size/batchSize)) - 1):
+            gradW1, gradb1, gradW2, gradb2 = back_prop(trainX[:, i*batchSize:(i*batchSize) + batchSize], trainY[i*batchSize:(i*batchSize) + batchSize], W1, b1, W2, b2)
             W1 = W1-(epsilon*gradW1)
             W2 = W2-(epsilon*gradW2)
             b1 = b1-(epsilon*gradb1)
             b2 = b2-(epsilon*gradb2)
-        print(f"------Stats------\nW1 = {W1}\nW2 = {W2}\nb1 = {b1}\nb2 = {b2}")
+        # print(f"------Stats------\nW1 = {W1}\nW2 = {W2}\nb1 = {b1}\nb2 = {b2}")
     #Was b2 supposed to be b2W
     return W1, b1, W2, b2
 
