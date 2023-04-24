@@ -103,24 +103,24 @@ if __name__ == "__main__":
     import csv
     with open ('HyperParamAccuracies.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(['hiddenLayers', 'epochs', 'batchSize', 'LossTrain', 'LossTest'])
-        hiddenLayers = [5, 10, 20, 30]
+        writer.writerow(['nodes', 'epochs', 'batchSize', 'LossTrain', 'LossTest'])
+        nodes = [5, 10, 20, 30]
         epochs = [50, 100, 250, 500]
         batchSizes = [32, 64, 128, 256]
-        for hl in hiddenLayers:
+        for node in nodes:
             for ep in epochs:
                 for bs in batchSizes:
                     # Initialize weights to reasonable random values
-                    W1 = 2*(np.random.random(size=(hl, NUM_INPUT))/NUM_INPUT**0.5) - 1./NUM_INPUT**0.5
-                    b1 = 0.01 * np.ones(hl)
-                    W2 = 2*(np.random.random(size=(NUM_OUTPUT, hl))/hl**0.5) - 1./hl**0.5
+                    W1 = 2*(np.random.random(size=(node, NUM_INPUT))/NUM_INPUT**0.5) - 1./NUM_INPUT**0.5
+                    b1 = 0.01 * np.ones(node)
+                    W2 = 2*(np.random.random(size=(NUM_OUTPUT, node))/node**0.5) - 1./node**0.5
                     b2 = np.mean(trainY)
                     # Train NN
                     W1, b1, W2, b2 = train(trainX, trainY, W1, b1, W2, b2, testX, testY, batchSize = bs, numEpochs=ep)
                     #Evaluate Accuracy
                     loss, x, z, h, yhat = forward_prop(trainX, trainY, W1, b1, W2, b2)
                     lossTest, xTest, zTest, hTest, yhatTest = forward_prop(testX, testY, W1, b1, W2, b2)
-                    print (f"Train Accuracy: hiddenLayers = {hl}, epochs = {ep}, batchSize = {bs}, Loss = {loss}")
-                    print (f"Test Accuracy: hiddenLayers = {hl}, epochs = {ep}, batchSize = {bs}, Loss = {lossTest}")
-                    writer.writerow([hl, ep, bs, loss, lossTest])
+                    print (f"Train Accuracy: nodes = {node}, epochs = {ep}, batchSize = {bs}, Loss = {loss}")
+                    print (f"Test Accuracy: nodes = {node}, epochs = {ep}, batchSize = {bs}, Loss = {lossTest}")
+                    writer.writerow([node, ep, bs, loss, lossTest])
                     #show_weight_vectors(W1)
